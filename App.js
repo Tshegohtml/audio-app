@@ -1,13 +1,35 @@
-// App.js
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, FlatList, Alert, TouchableOpacity, Dimensions } from 'react-native';
 import { Audio } from 'expo-av';
 import { StatusBar } from 'expo-status-bar';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+// Importing other components
+import Home from '../audio-app/components/home'; // HomePage Component
+import SignUp from '../audio-app/components/signup'; // SignUp Component
+import Login from '../audio-app/components/login'; // Login Component
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
+const Stack = createStackNavigator();
+
 export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="SignUp" component={SignUp} />
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="RecordingApp" component={RecordingApp} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+// RecordingApp component (was previously inside App.js)
+function RecordingApp() {
   const [recording, setRecording] = useState(null);
   const [recordings, setRecordings] = useState([]);
   const [permission, setPermission] = useState(false);
@@ -128,60 +150,58 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
   },
-  recordButton: {
+  button: {
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 20,
-  },
-  startButton: {
+    marginBottom: 10,
     backgroundColor: '#4CAF50',
-  },
-  stopButton: {
-    backgroundColor: '#F44336',
   },
   buttonText: {
     fontSize: 18,
     fontWeight: '600',
     color: '#fff',
   },
+  recordButton: {
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  startButton: {
+    backgroundColor: '#4CAF50',
+  },
+  stopButton: {
+    backgroundColor: '#FF5733',
+  },
   timerText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#444',
-    textAlign: 'center',
+    fontSize: 18,
     marginBottom: 20,
   },
   recordingItem: {
-    padding: 15,
-    marginVertical: 8,
     backgroundColor: '#fff',
+    marginBottom: 10,
+    padding: 10,
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 1, height: 3 },
-    shadowRadius: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: screenWidth - 40,
   },
   recordingText: {
     fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
   },
   buttons: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 10,
   },
   playButton: {
+    padding: 10,
     backgroundColor: '#4CAF50',
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 10,
+    marginRight: 10,
   },
   deleteButton: {
-    backgroundColor: '#F44336',
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+    padding: 10,
+    backgroundColor: '#FF5733',
+    borderRadius: 10,
   },
 });
