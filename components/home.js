@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   text: {
-    fontSize: 40, // Increased font size
+    fontSize: 20, // Increased font size
     fontWeight: 'bold', // Bold text
     marginBottom: 20, // Adding margin below text for spacing
   },
