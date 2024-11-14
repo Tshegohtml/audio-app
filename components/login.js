@@ -40,7 +40,7 @@ export default function Login({ navigation }) {
         onChangeText={setPassword}
       />
       <Button title="Login" onPress={handleLogin} />
-      <Button title="Go to Sign Up" onPress={() => navigation.navigate('SignUp')} />
+      <Button title="Go to Sign Up" onPress={() => navigation.navigate('Profile')} />
     </View>
   );
 }

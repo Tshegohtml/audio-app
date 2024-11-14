@@ -1,14 +1,16 @@
+// App.js
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, FlatList, Alert, TouchableOpacity, Dimensions } from 'react-native';
 import { Audio } from 'expo-av';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { AuthProvider, useAuth } from './context/authContext'; // Correct import for AuthContext
 
-// Importing other components
-import Home from '../audio-app/components/home'; // HomePage Component
-import SignUp from '../audio-app/components/signup'; // SignUp Component
-import Login from '../audio-app/components/login'; // Login Component
+import Home from './components/home';
+import SignUp from './components/signup';
+import Login from './components/login';
+import Profile from './components/profile';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -17,19 +19,34 @@ const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="SignUp" component={SignUp} />
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="RecordingApp" component={RecordingApp} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <AuthProvider> {/* Wrap the entire app with AuthProvider */}
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
 
-// RecordingApp component (was previously inside App.js)
-function RecordingApp() {
+function AppNavigator() {
+  const { user } = useAuth(); // Get user from context
+
+  return (
+    <Stack.Navigator initialRouteName="Home">
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="SignUp" component={SignUp} />
+      {/* Only show the Login screen if the user is not authenticated */}
+      {!user ? (
+        <Stack.Screen name="Login" component={Login} />
+      ) : (
+        // If the user is authenticated, go straight to Profile screen
+        <Stack.Screen name="Profile" component={Profile} />
+      )}
+      <Stack.Screen name="RecordingApp" component={RecordingApp} />
+    </Stack.Navigator>
+  );
+}
+// RecordingApp Component (no changes)
+function RecordingApp({ navigation }) {
   const [recording, setRecording] = useState(null);
   const [recordings, setRecordings] = useState([]);
   const [permission, setPermission] = useState(false);
@@ -83,6 +100,14 @@ function RecordingApp() {
     await sound.playAsync();
   }
 
+  async function shareRecording(uri) {
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(uri);
+    } else {
+      Alert.alert("Sharing not available", "Your device does not support sharing.");
+    }
+  }
+
   function deleteRecording(index) {
     setRecordings(prev => prev.filter((_, i) => i !== index));
     Alert.alert("Recording deleted");
@@ -97,7 +122,6 @@ function RecordingApp() {
   return (
     <View style={[styles.container, { height: screenHeight }]}>
       <Text style={styles.title}>Audio Recording App</Text>
-
       <TouchableOpacity
         style={[styles.recordButton, recording ? styles.stopButton : styles.startButton]}
         onPress={recording ? stopRecording : startRecording}
@@ -127,81 +151,72 @@ function RecordingApp() {
         )}
       />
 
+      {/* Go to Profile Button */}
+      <TouchableOpacity
+        style={styles.profileButton}
+        onPress={() => navigation.navigate('Profile')}
+      >
+        <Text style={styles.buttonText}>Go to Profile</Text>
+      </TouchableOpacity>
+
       <StatusBar style="auto" />
     </View>
   );
 }
 
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#D3D3D3', // Light grey background
-    padding: 20,
-    paddingTop: 40,
-    justifyContent: 'center', // Vertically center the container
-    alignItems: 'center', // Horizontally center the container
-    height: 500, // Set a fixed height for the container
-    borderRadius: 10, // Add rounded corners for a more polished look
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#333',
-    textAlign: 'center',
-  },
-  button: {
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 10,
-    backgroundColor: '#4CAF50',
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
   },
   recordButton: {
-    padding: 20,
-    borderRadius: 10,
+    padding: 10,
+    borderRadius: 5,
     marginBottom: 20,
   },
   startButton: {
     backgroundColor: '#4CAF50',
   },
   stopButton: {
-    backgroundColor: '#FF5733',
+    backgroundColor: '#F44336',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
   },
   timerText: {
     fontSize: 18,
     marginBottom: 20,
   },
   recordingItem: {
-    backgroundColor: '#fff',
-    marginBottom: 10,
+    marginVertical: 10,
     padding: 10,
-    borderRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: screenWidth - 40,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
   },
   recordingText: {
     fontSize: 16,
   },
   buttons: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   playButton: {
+    backgroundColor: '#2196F3',
     padding: 10,
-    backgroundColor: '#4CAF50',
-    borderRadius: 10,
-    marginRight: 10,
+    borderRadius: 5,
   },
   deleteButton: {
+    backgroundColor: '#F44336',
     padding: 10,
-    backgroundColor: '#FF5733',
-    borderRadius: 10,
+    borderRadius: 5,
   },
 });
